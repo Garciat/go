@@ -394,5 +394,11 @@ func (x *operand) assignableTo(check *Checker, T Type, cause *string) (bool, Cod
 		return ok, code
 	}
 
+	// x's type V is a type parameter and T is a type parameter,
+	// and T is V's type bound.
+	if Vp != nil && Tp != nil && Vp.bound == Tp {
+		return true, 0
+	}
+
 	return false, IncompatibleAssign
 }

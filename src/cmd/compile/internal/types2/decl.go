@@ -611,6 +611,8 @@ func (check *Checker) collectTypeParams(dst **TypeParamList, list []*syntax.Fiel
 		check.inTParamList = false
 	}()
 
+	tparamEdges := make(map[*TypeParam]*TypeParam)
+
 	// Keep track of bounds for later validation.
 	var bound Type
 	for i, f := range list {
@@ -619,16 +621,36 @@ func (check *Checker) collectTypeParams(dst **TypeParamList, list []*syntax.Fiel
 		// when printing type strings.
 		if i == 0 || f.Type != list[i-1].Type {
 			bound = check.bound(f.Type)
-			if isTypeParam(bound) {
-				// We may be able to allow this since it is now well-defined what
-				// the underlying type and thus type set of a type parameter is.
-				// But we may need some additional form of cycle detection within
-				// type parameter lists.
-				check.error(f.Type, MisplacedTypeParam, "cannot use a type parameter as constraint")
-				bound = Typ[Invalid]
+			if boundTp, ok := Unalias(bound).(*TypeParam); ok {
+				// Keep track of type param edges for cycle detection.
+				tparamEdges[tparams[i]] = boundTp
 			}
 		}
 		tparams[i].bound = bound
+	}
+
+	// Find cycles in the type parameter constraints.
+	if len(tparamEdges) >= 2 {
+		for i, f := range list {
+			fTp := tparams[i]
+			cur := fTp
+			cycle := false
+			for {
+				next, ok := tparamEdges[cur]
+				if !ok {
+					break
+				}
+				if next.id == fTp.id {
+					cycle = true
+					break
+				}
+				cur = next
+			}
+			if cycle {
+				check.error(f.Type, MisplacedTypeParam, "invalid recursive type parameter constraint")
+				tparams[i].bound = Typ[Invalid]
+			}
+		}
 	}
 }
 
