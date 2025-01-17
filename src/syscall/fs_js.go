@@ -15,9 +15,9 @@ import (
 // Provided by package runtime.
 func now() (sec int64, nsec int32)
 
-var jsProcess = js.Global().Get("process")
-var jsPath = js.Global().Get("path")
-var jsFS = js.Global().Get("fs")
+var jsProcess = js.LibProcess()
+var jsPath = js.LibPath()
+var jsFS = js.LibFS()
 var constants = jsFS.Get("constants")
 
 var uint8Array = js.Global().Get("Uint8Array")

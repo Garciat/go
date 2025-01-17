@@ -98,6 +98,11 @@ var (
 
 	objectConstructor = valueGlobal.Get("Object")
 	arrayConstructor  = valueGlobal.Get("Array")
+
+	jsLib     = jsGo.Get("lib")
+	jsFS      = jsLib.Get("fs")
+	jsProcess = jsLib.Get("process")
+	jsPath    = jsLib.Get("path")
 )
 
 // Equal reports whether v and w are equal according to JavaScript's === operator.
@@ -133,6 +138,21 @@ func (v Value) IsNaN() bool {
 // Global returns the JavaScript global object, usually "window" or "global".
 func Global() Value {
 	return valueGlobal
+}
+
+// LibFS returns the JavaScript object responsible for filesystem syscalls.
+func LibFS() Value {
+	return jsFS
+}
+
+// LibProcess returns the JavaScript object responsible for process syscalls.
+func LibProcess() Value {
+	return jsProcess
+}
+
+// LibPath returns the JavaScript object responsible for path syscalls.
+func LibPath() Value {
+	return jsPath
 }
 
 // ValueOf returns x as a JavaScript value:

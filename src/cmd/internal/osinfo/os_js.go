@@ -26,7 +26,7 @@ func Version() (string, error) {
 
 func node() (version string, ok bool) {
 	// Try the https://nodejs.org/api/process.html#processversion API.
-	p := js.Global().Get("process")
+	p := js.LibProcess()
 	if p.IsUndefined() {
 		return "", false
 	}
